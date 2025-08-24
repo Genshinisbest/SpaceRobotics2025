@@ -234,10 +234,18 @@ class ParticleFilter(Node):
         # "random_uniform(a, b)" will give you a random value with uniform distribution between "a" and "b"
         # "self.map_x_min_", "self.map_x_max_", "self.map_y_min_", and "self.map_y_max_" give you the limits of the map
         # Orientation (theta) should be between 0 and 2*Pi
-
+        
         ####################
         ## YOUR CODE HERE ##
         ## TASK 1         ##
+
+        for i in range(self.num_particles_):
+            x = random_uniform(self.map_x_min_, self.map_x_max_)
+            y = random_uniform(self.map_y_min_, self.map_y_max_)
+            theta = random_uniform(0, 2 * math.pi)
+            weight = 1.0 / self.num_particles_
+            self.particles_.append(Particle(x, y, theta, weight))
+
         ####################
 
 
