@@ -34,16 +34,27 @@ class GraphSearch:
             ## YOUR CODE HERE ##
             ## Task 2         ##
             ####################
-            pass # you can remove this after completing this task
-
-
-
-
-
-
-
-
-
+            # Find the neighbor closest to the goal
+            goal_node = self.graph_.nodes_[goal_idx]
+            best_neighbor = None
+            best_distance = float('inf')
+            
+            # Check all neighbors of current node
+            for neighbor in current.neighbours:
+                distance_to_goal = neighbor.distance_to(goal_node)
+                if distance_to_goal < best_distance:
+                    best_distance = distance_to_goal
+                    best_neighbor = neighbor
+            
+            # If no neighbors found, path planning failed
+            if best_neighbor is None:
+                self.parent_logger_.error('No path found - dead end reached!')
+                return []
+            
+            # Move to the best neighbor
+            current = best_neighbor
+            path.append(current)
+            ####################
 
 
 
@@ -80,7 +91,8 @@ class GraphSearch:
             ####################
             # Select a node
             # hint: self.get_minimum_cost_node(unvisited_set) will help you find the node with the minimum cost
-
+            min_idx = self.get_minimum_cost_node(unvisited_set)
+            node_idx = unvisited_set[min_idx]
 
             
 
@@ -89,8 +101,8 @@ class GraphSearch:
             ## Task 3         ##
             ####################
             # Move the node to the visited set
-
-
+            unvisited_set.remove(node_idx)
+            visited_set.append(node_idx)
 
             
 
@@ -100,12 +112,9 @@ class GraphSearch:
             ####################
             # Termination criteria
             # Finish early (i.e. "return") if the goal is found
-            # if ??:
-            #     self.parent_logger_.info('Goal found!')
-            #     return
-
-
-
+            if node_idx == goal_idx:
+                self.parent_logger_.info('Goal found!')
+                return
 
             # For each neighbour of the node
             for neighbour_idx in range(len(self.graph_.nodes_[node_idx].neighbours)):
@@ -132,7 +141,10 @@ class GraphSearch:
                     # hint: cost_to_node = cost-of-previous-node + cost-of-edge 
                     # hint: cost_to_node_to_goal_heuristic = cost_to_node + self.heuristic_weight_ * A*-heuristic-score
                     # hint: neighbour.distance_to() function is likely to be helpful for the heuristic-score
-
+                    goal_node = self.graph_.nodes_[goal_idx]
+                    cost_to_node = self.graph_.nodes_[node_idx].cost_to_node + neighbour_edge_cost
+                    heuristic_cost = neighbour.distance_to(goal_node)
+                    cost_to_node_to_goal_heuristic = cost_to_node + self.heuristic_weight_ * heuristic_cost
 
                     
 
@@ -148,14 +160,13 @@ class GraphSearch:
                         ## YOUR CODE HERE ##
                         ## Task 3         ##
                         ####################
-                        pass # you can remove this line after you've completed the task
-                        # if ??:
-                        #     neighbour.parent_node = ??
-                        #     neighbour.cost_to_node = ??
-                        #     neighbour.cost_to_node_to_goal_heuristic = ??
-
-
-
+                        # If the cost is lower than the previous cost for this node
+                        # Then update it to the new cost
+                        # Also, update the parent pointer to point to the new parent 
+                        if cost_to_node < neighbour.cost_to_node:
+                            neighbour.parent_node = self.graph_.nodes_[node_idx]
+                            neighbour.cost_to_node = cost_to_node
+                            neighbour.cost_to_node_to_goal_heuristic = cost_to_node_to_goal_heuristic
 
                     else:
 
@@ -169,12 +180,10 @@ class GraphSearch:
                         ## YOUR CODE HERE ##
                         ## Task 3         ##
                         ####################
-                        # neighbour.parent_node = ??
-                        # neighbour.cost_to_node = ??
-                        # neighbour.cost_to_node_to_goal_heuristic = ??
-
-
-
+                        # Initialise the cost and the parent pointer
+                        neighbour.parent_node = self.graph_.nodes_[node_idx]
+                        neighbour.cost_to_node = cost_to_node
+                        neighbour.cost_to_node_to_goal_heuristic = cost_to_node_to_goal_heuristic
 
             # Visualise the current search status in RVIZ
             self.visualise_search_(visited_set, unvisited_set)
@@ -205,12 +214,15 @@ class GraphSearch:
         ## YOUR CODE HERE ##
         ## Task 4         ##
         ####################
-
-
-
-
-
-
+        
+        # Follow parent pointers back to the start
+        while current.parent_node is not None:
+            current = current.parent_node
+            path.append(current)
+        
+        # Reverse the path to get start-to-goal order
+        path.reverse()
+        ####################
         
         return path
 

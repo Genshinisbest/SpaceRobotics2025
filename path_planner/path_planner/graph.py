@@ -392,12 +392,16 @@ class Graph:
             ## YOUR CODE HERE ##
             ## Task 1         ##
             ####################
+            # Calculate distance from the current node to the given xy point
+            current_node = self.nodes_[i]
+            distance = math.sqrt((current_node.x - xy[0])**2 + (current_node.y - xy[1])**2)
+            
+            # Update best distance and index if this node is closer
+            if distance < best_dist:
+                best_dist = distance
+                best_index = i
+            ####################
 
-
-
-
-
-            pass # you can remove this line after you have filled in the above code
 
         return best_index
 
