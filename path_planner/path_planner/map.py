@@ -74,6 +74,51 @@ class Map:
         ## Task 9         ##
         ####################
 
+        # Initialize distance transform map with infinity for free space and 0 for obstacles
+        self.distance_transform_map_ = np.full((rows, cols), np.inf, dtype=float)
+        
+        # Set obstacle cells to distance 0
+        obstacle_indices = np.where(self.obstacle_map_ >= 0.5)
+        self.distance_transform_map_[obstacle_indices] = 0.0
+        
+        # Forward pass (top-left to bottom-right)
+        for i in range(rows):
+            for j in range(cols):
+                if self.distance_transform_map_[i, j] > 0:  # Not an obstacle
+                    min_dist = self.distance_transform_map_[i, j]
+                    
+                    # Check neighbors (up, left, up-left, up-right)
+                    if i > 0:  # Up
+                        min_dist = min(min_dist, self.distance_transform_map_[i-1, j] + 1.0)
+                    if j > 0:  # Left
+                        min_dist = min(min_dist, self.distance_transform_map_[i, j-1] + 1.0)
+                    if i > 0 and j > 0:  # Up-left diagonal
+                        min_dist = min(min_dist, self.distance_transform_map_[i-1, j-1] + np.sqrt(2))
+                    if i > 0 and j < cols-1:  # Up-right diagonal
+                        min_dist = min(min_dist, self.distance_transform_map_[i-1, j+1] + np.sqrt(2))
+                    
+                    self.distance_transform_map_[i, j] = min_dist
+        
+        # Backward pass (bottom-right to top-left)
+        for i in range(rows-1, -1, -1):
+            for j in range(cols-1, -1, -1):
+                if self.distance_transform_map_[i, j] > 0:  # Not an obstacle
+                    min_dist = self.distance_transform_map_[i, j]
+                    
+                    # Check neighbors (down, right, down-left, down-right)
+                    if i < rows-1:  # Down
+                        min_dist = min(min_dist, self.distance_transform_map_[i+1, j] + 1.0)
+                    if j < cols-1:  # Right
+                        min_dist = min(min_dist, self.distance_transform_map_[i, j+1] + 1.0)
+                    if i < rows-1 and j > 0:  # Down-left diagonal
+                        min_dist = min(min_dist, self.distance_transform_map_[i+1, j-1] + np.sqrt(2))
+                    if i < rows-1 and j < cols-1:  # Down-right diagonal
+                        min_dist = min(min_dist, self.distance_transform_map_[i+1, j+1] + np.sqrt(2))
+                    
+                    self.distance_transform_map_[i, j] = min_dist
+
+        ####################
+
         
 
 
@@ -82,27 +127,6 @@ class Map:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        
 
     def generate_pcl2_msg(self, stamp_now):
         """The map is published as a PointCloud2 message, created here"""

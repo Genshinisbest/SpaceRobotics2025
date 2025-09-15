@@ -192,9 +192,37 @@ class Graph:
                                 ## YOUR CODE HERE ##
                                 ## TASK 6         ##
                                 ####################
-                                energy_cost = distance # Comment this out once you've done this Task
+                                # energy_cost = distance # Comment this out once you've done this Task
                                 # energy_cost = ??
+
+                                # Define constants within the function
+                                MU = 0.1  # Rolling resistance coefficient
+                                MASS = 1025  # Mass of the rover in kg
+                                GRAVITY = 3.71  # Gravity on Mars in m/s^2
+
+                                # Convert pixel coordinates to world coordinates
+                                [world_x_i, world_y_i, elevation_i] = self.map_.pixel_to_world(node_i.x, node_i.y)
+                                [world_x_j, world_y_j, elevation_j] = self.map_.pixel_to_world(node_j.x, node_j.y)
+
+                                # Calculate horizontal distance (2D Euclidean distance)
+                                dx_horizontal = math.sqrt((world_x_j - world_x_i)**2 + (world_y_j - world_y_i)**2)
                                 
+                                # Calculate change in elevation
+                                delta_elevation = elevation_j - elevation_i
+                                
+                                # Calculate slope (theta)
+                                if dx_horizontal != 0:  # To avoid division by zero
+                                    theta = math.atan(delta_elevation / dx_horizontal)
+                                else:
+                                    theta = 0
+
+                                # Calculate the 3D distance between nodes
+                                dx_3d = math.sqrt(dx_horizontal**2 + delta_elevation**2)
+
+                                # Calculate energy cost
+                                energy_cost = abs((MU * MASS * GRAVITY * math.cos(theta)) + (MASS * GRAVITY * math.sin(theta))) * dx_3d
+                                
+                                ####################
 
 
 
@@ -232,8 +260,20 @@ class Graph:
         ## Task 7         ##
         ####################
 
-        # while len(self.nodes_) < num_nodes:
-        #   ??
+        while len(self.nodes_) < num_nodes:
+            # Generate random x and y coordinates within the map bounds
+            x = random.randint(self.map_.min_x_, self.map_.max_x_ - 1)
+            y = random.randint(self.map_.min_y_, self.map_.max_y_ - 1)
+            
+            # Check if the randomly generated position is not occupied
+            occupied = self.map_.is_occupied(x, y)
+            
+            # Create the node if the position is free
+            if not occupied:
+                self.nodes_.append(Node(x, y, idx))
+                idx = idx + 1
+        ####################
+
 
 
 
@@ -267,8 +307,34 @@ class Graph:
                                 ## YOUR CODE HERE         ##
                                 ## TASK 6 -- after TASK 7 ##
                                 ############################
-                                energy_cost = distance # Comment this out once you've done this Task
-                                # energy_cost = ??
+                                # energy_cost = distance # Comment this out once you've done this Task
+                                
+                                # Define constants within the function
+                                MU = 0.1  # Rolling resistance coefficient
+                                MASS = 1025  # Mass of the rover in kg
+                                GRAVITY = 3.71  # Gravity on Mars in m/s^2
+
+                                # Convert pixel coordinates to world coordinates
+                                [world_x_i, world_y_i, elevation_i] = self.map_.pixel_to_world(node_i.x, node_i.y)
+                                [world_x_j, world_y_j, elevation_j] = self.map_.pixel_to_world(node_j.x, node_j.y)
+
+                                # Calculate horizontal distance (2D Euclidean distance)
+                                dx_horizontal = math.sqrt((world_x_j - world_x_i)**2 + (world_y_j - world_y_i)**2)
+                                
+                                # Calculate change in elevation
+                                delta_elevation = elevation_j - elevation_i
+                                
+                                # Calculate slope (theta)
+                                if dx_horizontal != 0:  # To avoid division by zero
+                                    theta = math.atan(delta_elevation / dx_horizontal)
+                                else:
+                                    theta = 0
+
+                                # Calculate the 3D distance between nodes
+                                dx_3d = math.sqrt(dx_horizontal**2 + delta_elevation**2)
+
+                                # Calculate energy cost
+                                energy_cost = abs((MU * MASS * GRAVITY * math.cos(theta)) + (MASS * GRAVITY * math.sin(theta))) * dx_3d
                                 
 
 
@@ -306,9 +372,8 @@ class Graph:
         ## Task 10        ##
         ####################
         distance_transform_map = self.map_.distance_transform_map_
-
-
-
+        
+        
 
 
 
@@ -351,8 +416,34 @@ class Graph:
                                 ## YOUR CODE HERE         ##
                                 ## TASK 6 -- after TASK 10##
                                 ############################
-                                energy_cost = distance # Comment this out once you've done this Task
-                                # energy_cost = ??
+                                # energy_cost = distance # Comment this out once you've done this Task
+                                
+                                # Define constants within the function
+                                MU = 0.1  # Rolling resistance coefficient
+                                MASS = 1025  # Mass of the rover in kg
+                                GRAVITY = 3.71  # Gravity on Mars in m/s^2
+
+                                # Convert pixel coordinates to world coordinates
+                                [world_x_i, world_y_i, elevation_i] = self.map_.pixel_to_world(node_i.x, node_i.y)
+                                [world_x_j, world_y_j, elevation_j] = self.map_.pixel_to_world(node_j.x, node_j.y)
+
+                                # Calculate horizontal distance (2D Euclidean distance)
+                                dx_horizontal = math.sqrt((world_x_j - world_x_i)**2 + (world_y_j - world_y_i)**2)
+                                
+                                # Calculate change in elevation
+                                delta_elevation = elevation_j - elevation_i
+                                
+                                # Calculate slope (theta)
+                                if dx_horizontal != 0:  # To avoid division by zero
+                                    theta = math.atan(delta_elevation / dx_horizontal)
+                                else:
+                                    theta = 0
+
+                                # Calculate the 3D distance between nodes
+                                dx_3d = math.sqrt(dx_horizontal**2 + delta_elevation**2)
+
+                                # Calculate energy cost
+                                energy_cost = abs((MU * MASS * GRAVITY * math.cos(theta)) + (MASS * GRAVITY * math.sin(theta))) * dx_3d
                                 
 
 
@@ -427,18 +518,24 @@ class Graph:
 
         # Current group
         group_number = 1
+        
+        # Process each node to find connected components
+        for node_idx in range(len(self.nodes_)):
+            # Skip if this node is already assigned to a group
+            if groups[node_idx] != 0:
+                continue
+                
+            # Find all nodes connected to this node
+            connected_nodes = graph_search.find_connected_nodes(node_idx)
+            
+            # Assign all connected nodes to the current group
+            for connected_node_idx in connected_nodes:
+                groups[connected_node_idx] = group_number
+                
+            # Move to next group number
+            group_number += 1
 
-
-
-
-
-
-
-
-
-
-
-
+        ####################
 
         # Save it here so it will show up in the visualisation as different colours
         self.groups_ = groups
